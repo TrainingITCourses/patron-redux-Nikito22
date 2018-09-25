@@ -10,14 +10,15 @@ import { AppComponent } from './app.component';
 import { LsBuscadorComponent } from './ls-buscador/ls-buscador.component';
 import { LsBuscadorCriteriosComponent } from './ls-buscador/buscadorCriterios/buscadorCriterios.component';
 import { LsBuscadorLanzamientosComponent } from './ls-buscador/buscadorLanzamientos/buscadorLanzamientos.component';
-
+import { IsaStore } from './stores/isa-store.state';
 
 @NgModule({
     declarations: [
         AppComponent,
         LsBuscadorComponent,
         LsBuscadorCriteriosComponent,
-        LsBuscadorLanzamientosComponent
+        LsBuscadorLanzamientosComponent,
+        IsaStore
     ],
     imports: [
         BrowserModule,
@@ -25,7 +26,8 @@ import { LsBuscadorLanzamientosComponent } from './ls-buscador/buscadorLanzamien
     ],
     exports: [],
     providers: [
-        APIService
+        APIService,
+        IsaStore
     ],
     bootstrap: [
         AppComponent
