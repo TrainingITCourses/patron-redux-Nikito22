@@ -1,3 +1,3 @@
-<select *ngIf="valoresCriterios" (change)="alCambioCriterio($event)">
+<select (change)="cambioCriterio($event)">
   <option [value]='o.value' *ngFor="let o of valoresCriterios"> {{o.viewValue}} </option>
 </select>

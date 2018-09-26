@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
-import { Lanzamiento } from '../../api.service';
+import { Lanzamiento } from 'app/stores/isa.model';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
