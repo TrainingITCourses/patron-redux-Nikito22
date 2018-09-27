@@ -1,44 +1,60 @@
 import { IsaActions, IsaActionTypes } from './isa-store.actions';
-import { Isa, IsaInitial } from './isa.model';
+import { Isa, IsaInitial, enTipoCriterio } from './isa.model';
+
+interface Mission {
+  type: number;
+}
+interface Agency {
+  id: number;
+}
+interface Rocket {
+  agencies: Agency[];
+}
 
 export function isaStoreReducer(
   state = IsaInitial,
   action: IsaActions
 ): Isa {
   const result = { ...state };
+
   switch (action.type) {
-    case IsaActionTypes.LoadLaunches:
-      result.launches = action.payload.map(d => ({
-        name: d.name, launchDate: d.net, status: d.status, agencyId: d.rocket.agency[0].id, missionType: d.missions[0].type
-      }));
-      break;
-
-    case IsaActionTypes.LoadStatuses:
-      result.statuses = action.payload.map(d => ({
-        value: d.id, viewValue: d.id + ' - ' + d.description + ' (' + d.name + ')'
-      }));
-      break;
-
-    case IsaActionTypes.LoadAgencies:
-      result.agencies = action.payload.map(d => ({
-        value: d.id, viewValue: d.id + ' - ' + d.name
-      }));
-      break;
-
-    case IsaActionTypes.LoadMissionTypes:
-      result.missionTypes = action.payload.map(d => ({
-        value: d.id, viewValue: d.id + ' - ' + d.name
-      }));
-      break;
 
     case IsaActionTypes.CambioTipoCriterio:
+
       result.tipoCriterio = action.payload;
+      switch (action.payload) {
+        case enTipoCriterio.Estado:
+          result.criterios = result._estados;
+          break;
+
+        case enTipoCriterio.Agencia:
+          result.criterios = result._agencias;
+          break;
+
+        case enTipoCriterio.TipoMision:
+          result.criterios = result._tiposMision;
+          break;
+      }
+      console.log('Asignados criterios ' + enTipoCriterio[action.payload]);
       break;
 
     case IsaActionTypes.CambioCritero:
-      result.criterio = action.payload;
+      switch (result.tipoCriterio) {
+        case enTipoCriterio.Estado:
+          result.lanzamientos = result._lanzamientos.filter(l => l.status === Number(action.payload));
+          break;
+
+        case enTipoCriterio.Agencia:
+          result.lanzamientos = result._lanzamientos.filter(l => l.agencyId === Number(action.payload));
+          break;
+
+        case enTipoCriterio.TipoMision:
+          result.lanzamientos = result._lanzamientos.filter(l => l.missionType === Number(action.payload));
+          break;
+      }
+      console.log(`Asignado ${result.lanzamientos.length} lanzamientos del tipoCriterio:
+          ${enTipoCriterio[result.tipoCriterio]} criterio: ${action.payload}`);
       break;
   }
   return result;
 }
-

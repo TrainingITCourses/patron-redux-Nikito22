@@ -1,45 +1,26 @@
-import { Component, OnInit, Input, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
+import { CambioCritero } from './../../stores/isa-store.actions';
+import { Component, OnInit } from '@angular/core';
 import { IsaStore, IsaSlideTypes } from './../../stores/isa-store.state';
-import { CambioCriterio } from '../../stores/isa-store.actions';
-import { Selopt, enTipoCriterio } from '../../stores/isa.model';
 import { Observable } from 'rxjs';
 
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ls-buscador-criterios',
   templateUrl: './buscadorCriterios.component.html',
   styleUrls: ['./buscadorCriterios.component.css']
 })
 
 export class LsBuscadorCriteriosComponent implements OnInit {
-  valoresCriterio: Selopt[] = [];
-  tipoCriterio: enTipoCriterio;
+
+  public criterios$: Observable<any>;
 
   constructor(public Isa: IsaStore) { }
 
   ngOnInit() {
-    this.Isa.select$(IsaSlideTypes.enTipoCriterio).subscribe(tp => this.cargaValores(tp));
+    this.criterios$ = this.Isa.select$(IsaSlideTypes.criterios);
   }
 
-  cargaValores(tp: enTipoCriterio) {
-    this.tipoCriterio = tp;
-    switch (this.tipoCriterio) {
-      case enTipoCriterio.Estado:
-        this.valoresCriterio = this.Isa.selectSnapShot(IsaSlideTypes.statuses);
-        break;
-
-      case enTipoCriterio.Agencia:
-        this.valoresCriterio = this.Isa.selectSnapShot(IsaSlideTypes.agencies);
-        break;
-
-      case enTipoCriterio.TipoMision:
-        this.valoresCriterio = this.Isa.selectSnapShot(IsaSlideTypes.missionTypes);
-        break;
-    }
-  }
-
-  cambioCriterio(event) {
-    this.Isa.dispatch(new CambioCriterio(event.target.value));
+  onCambioCriterio(event) {
+    this.Isa.dispatch(new CambioCritero(event.target.value));
   }
 }

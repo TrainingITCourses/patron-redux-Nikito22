@@ -2,21 +2,28 @@ import { Selopt } from './isa.model';
 /// ISA is an acronim of International Space Agency (Dedicater to my dear aunt Isabel)
 
 export interface Isa {
-  launches: Lanzamiento[];
-  statuses: Selopt[];
-  agencies: Selopt[];
-  missionTypes: Selopt[];
+  // Valores _cacheados, no expuestos por el store
+  _estados: Selopt[];
+  _agencias: Selopt[];
+  _tiposMision: Selopt[];
+  _lanzamientos: Lanzamiento[];
+  _tiposCriterios: string[];
+
+  // Valores expuestos por el store
   tipoCriterio: enTipoCriterio;
-  criterio: string;
+  criterios: Selopt[];
+  lanzamientos: Lanzamiento[];
 }
 
 export const IsaInitial: Isa = {
-  launches: [],
-  statuses: [],
-  agencies: [],
-  missionTypes: [],
+  _estados: [],
+  _agencias: [],
+  _tiposMision: [],
+  _lanzamientos: [],
+  _tiposCriterios: [],
   tipoCriterio: null,
-  criterio: null
+  criterios: [],
+  lanzamientos: [],
 };
 
 
@@ -31,21 +38,11 @@ export interface Selopt {
   viewValue: string;
 }
 
-export interface Mission {
-  type: number;
-}
-export interface Agency {
-  id: number;
-}
-export interface Rocket {
-  agencies: Agency[];
-}
-
 export interface Lanzamiento {
   name: string;
   launchDate: string;
   status: number;
-  agencyId: string;
+  agencyId: number;
   missionType: number;
 }
 

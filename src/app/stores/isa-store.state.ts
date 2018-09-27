@@ -1,49 +1,77 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, forkJoin } from 'rxjs';
 import { IsaActions, IsaActionTypes } from './isa-store.actions';
 import { isaStoreReducer } from './isa-store.reducer';
-import { Isa, IsaInitial, enTipoCriterio } from './isa.model';
+import { Isa, IsaInitial, Lanzamiento, enTipoCriterio } from './isa.model';
+import { delay } from 'rxjs/operators';
+
 
 @Injectable({
   providedIn: 'root'
 })
-
 export class IsaStore {
   private state: Isa = { ...IsaInitial };
 
-  // Para emitir eventos de carga de cada json
-  private statuses$ = new BehaviorSubject<any>(this.state.statuses);
-  private agencies$ = new BehaviorSubject<any>(this.state.agencies);
-  private missionTypes$ = new BehaviorSubject<any>(this.state.missionTypes);
-  private launches$ = new BehaviorSubject<any>(this.state.launches);
+  // Para emitir eventos cuando cambien los valores de los criterios y los lanzamientos filtrados
+  private criterios$ = new BehaviorSubject<any>(this.state.criterios);
+  private lanzamientos$ = new BehaviorSubject<any>(this.state.lanzamientos);
 
-  // Para emitir eventos de cambio de tipo de criterio y valores de criterio
-  private tipoCriterio$ = new BehaviorSubject<enTipoCriterio>(this.state.tipoCriterio);
-  private criterio$ = new BehaviorSubject<string>(this.state.criterio);
+  constructor(public http: HttpClient) {
 
-  constructor() { }
+    forkJoin([
+      http.get('/assets/launchstatus.json'),
+      http.get('/assets/launchagencies.json'),
+      http.get('/assets/launchmissions.json'),
+      http.get('/assets/launchlibrary.json')
+    ]).
+      pipe(
+        delay(200) // Imitamos una cierta demora si viniera de un WebService externo
+      ).subscribe((results: any[]) => {
+        // Ya que solo necesitamos ciertos campos, mapeamos los resultados para reducir el consumo de memoria
+        this.state._estados = results[0].types.map(d => ({
+          value: d.id, viewValue: d.id + ' - ' + d.description + ' (' + d.name + ')'
+        }));
+        this.state._agencias = results[1].agencies.map(d => ({
+          value: d.id, viewValue: d.id + ' - ' + d.name
+        }));
+        this.state._tiposMision = results[2].types.map(d => ({
+          value: d.id, viewValue: d.id + ' - ' + d.name
+        }));
+
+        this.state._lanzamientos = results[3].launches.map(d => ({
+          name: d.name
+          , launchDate: d.net
+          , status: d.status
+          , agencyId: d.rocket ? d.rocket.agencies ? d.rocket.agencies.length > 0 ? d.rocket.agencies[0].id : 0 : 0 : 0
+          , missionType: d.missions ? d.missions.length > 0 ? d.missions[0].type : 0 : 0
+        }));
+        console.log(this.state._lanzamientos[0]);
+        console.log('Store inicializado con los json mapeados (reducidos) y listos para su consumo');
+      });
+    this.state._tiposCriterios = Object.keys(enTipoCriterio).slice(Object.keys(enTipoCriterio).length / 2);
+  }
 
   public select$ = (slice: IsaSlideTypes) => {
     switch (slice) {
-      case IsaSlideTypes.statuses:
-      return this.statuses$.asObservable();
-      case IsaSlideTypes.agencies:
-      return this.agencies$.asObservable();
-      case IsaSlideTypes.launches:
-        return this.launches$.asObservable();
-      case IsaSlideTypes.missionTypes:
-        return this.missionTypes$.asObservable();
+      case IsaSlideTypes.criterios:
+        return this.criterios$.asObservable();
+      case IsaSlideTypes.lanzamientos:
+        return this.lanzamientos$.asObservable();
     }
   }
 
   public selectSnapShot = (slice: IsaSlideTypes): any[] => {
     switch (slice) {
-      case IsaSlideTypes.launches:
-        return [...this.state.launches];
-      case IsaSlideTypes.statuses:
-        return [...this.state.statuses];
-      case IsaSlideTypes.agencies:
-        return [...this.state.agencies];
+      case IsaSlideTypes.criterios:
+        return [...this.state.criterios];
+        break;
+      case IsaSlideTypes.lanzamientos:
+        return [...this.state.lanzamientos];
+        break;
+      case IsaSlideTypes.tiposCriterios:
+        return [...this.state._tiposCriterios];
+        break;
     }
   }
 
@@ -51,32 +79,20 @@ export class IsaStore {
     console.log('dispatching...', action);
     this.state = isaStoreReducer(this.state, action);
     switch (action.type) {
-      case IsaActionTypes.LoadLaunches:
-        this.launches$.next([...this.state.launches]);
-        break;
-      case IsaActionTypes.LoadStatuses:
-        this.statuses$.next([...this.state.statuses]);
-        break;
-      case IsaActionTypes.LoadAgencies:
-        this.agencies$.next([...this.state.agencies]);
-        break;
+
       case IsaActionTypes.CambioTipoCriterio:
-        const t: enTipoCriterio = this.state.tipoCriterio;
-        this.tipoCriterio$.next(t);
+        this.criterios$.next([...this.state.criterios]);
         break;
+
       case IsaActionTypes.CambioCritero:
-      const c: string = this.state.criterio;
-        this.criterio$.next(c);
+        this.lanzamientos$.next([...this.state.lanzamientos]);
         break;
     }
   }
 }
 
 export enum IsaSlideTypes {
-  launches ,
-  statuses,
-  agencies,
-  missionTypes,
-  enTipoCriterio,
-  criterio
+  tiposCriterios,
+  criterios,
+  lanzamientos
 }

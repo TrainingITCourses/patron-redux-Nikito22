@@ -1,6 +1,5 @@
-<div *ngIf="lanzamientos">
-  {{cuentaLanzamientos()}} lanzamientos
-</div>
 <ol>
-  <li *ngFor="let l of lanzamientos">{{l.name}}<span>{{l.net}}</span></li>
+  <li *ngFor="let l of lanzamientos$ | async">
+    {{l.name}} <span>{{l.net}}</span>
+  </li>
 </ol>
