@@ -6,7 +6,11 @@ import { isaStoreReducer } from './isa-store.reducer';
 import { Isa, IsaInitial, Lanzamiento, enTipoCriterio } from './isa.model';
 import { delay } from 'rxjs/operators';
 
-
+export enum IsaSlideTypes {
+  tiposCriterios,
+  criterios,
+  lanzamientos
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -26,7 +30,7 @@ export class IsaStore {
       http.get('/assets/launchlibrary.json')
     ]).
       pipe(
-        delay(200) // Imitamos una cierta demora si viniera de un WebService externo
+        delay(2000) // Imitamos una cierta demora si viniera de un WebService externo
       ).subscribe((results: any[]) => {
         // Ya que solo necesitamos ciertos campos, mapeamos los resultados para reducir el consumo de memoria
         this.state._estados = results[0].types.map(d => ({
@@ -80,6 +84,8 @@ export class IsaStore {
     this.state = isaStoreReducer(this.state, action);
     switch (action.type) {
 
+      // Con la carga inicial en el propio constructo del store no he necesitado
+      // una tercera accion de carga de datos iniciales
       case IsaActionTypes.CambioTipoCriterio:
         this.criterios$.next([...this.state.criterios]);
         break;
@@ -89,10 +95,4 @@ export class IsaStore {
         break;
     }
   }
-}
-
-export enum IsaSlideTypes {
-  tiposCriterios,
-  criterios,
-  lanzamientos
 }

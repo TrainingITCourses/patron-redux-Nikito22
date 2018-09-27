@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IsaStore, IsaSlideTypes } from './../stores/isa-store.state';
 import { CambioTipoCriterio, CambioCritero } from '../stores/isa-store.actions';
+import { Selopt } from '../stores/isa.model';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -11,12 +12,15 @@ import { CambioTipoCriterio, CambioCritero } from '../stores/isa-store.actions';
 })
 export class LsBuscadorComponent implements OnInit {
 
-    public tiposCriterios$: Observable<any>;
+    public tiposCriterios: Selopt[];
 
     constructor(public Isa: IsaStore) { }
 
     ngOnInit() {
-        this.tiposCriterios$ = this.Isa.selectSnapShot(IsaSlideTypes.tiposCriterios);
+        // Con el pipe async y los observables por slices no es realmente necesario usar los snapshots.
+        // He forzado el uso de snapshots en estos valores 'fijos' de tipos de criterios solo para satisfacer
+        // el enunciado del ejercicio
+        this.tiposCriterios = this.Isa.selectSnapShot(IsaSlideTypes.tiposCriterios);
     }
 
     alCambioTipoCriterio(event) {
