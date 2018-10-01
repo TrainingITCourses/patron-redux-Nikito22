@@ -1,14 +1,15 @@
-import { Selopt } from './isa.model';
 /// ISA is an acronim of International Space Agency (Dedicater to my dear aunt Isabel)
+export interface ICache {
+  estados: Selopt[];
+  agencias: Selopt[];
+  tiposMision: Selopt[];
+  lanzamientos: Lanzamiento[];
+}
 
 export interface Isa {
-  // Valores _cacheados, no expuestos por el store
-  _estados: Selopt[];
-  _agencias: Selopt[];
-  _tiposMision: Selopt[];
-  _lanzamientos: Lanzamiento[];
-  _tiposCriterios: string[];
-
+  // Valores _cacheados, para evitar copiarlos en la funcion reduce
+  cache: ICache;
+  cargado: boolean;
   // Valores expuestos por el store
   tipoCriterio: enTipoCriterio;
   criterios: Selopt[];
@@ -16,16 +17,17 @@ export interface Isa {
 }
 
 export const IsaInitial: Isa = {
-  _estados: [],
-  _agencias: [],
-  _tiposMision: [],
-  _lanzamientos: [],
-  _tiposCriterios: [],
+  cache: {
+    estados: [],
+    agencias: [],
+    tiposMision: [],
+    lanzamientos: []
+  },
+  cargado: false,
   tipoCriterio: null,
   criterios: [],
   lanzamientos: [],
 };
-
 
 export enum enTipoCriterio {
   Estado,

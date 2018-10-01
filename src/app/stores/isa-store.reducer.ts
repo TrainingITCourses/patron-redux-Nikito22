@@ -1,24 +1,29 @@
 import { IsaActions, IsaActionTypes } from './isa-store.actions';
-import { Isa, IsaInitial, enTipoCriterio } from './isa.model';
+import { Isa, enTipoCriterio } from './isa.model';
 
 export function isaStoreReducer(
-  state = IsaInitial,
+  state: Isa,
   action: IsaActions
 ): Isa {
   const result = { ...state };
   switch (action.type) {
+    case IsaActionTypes.CargaInicial:
+      result.cache = action.payload;
+      result.cargado = true;
+      console.log('Cargados datos iniciales');
+      break;
 
     case IsaActionTypes.CambioTipoCriterio:
       result.tipoCriterio = action.payload;
       switch (action.payload) {
         case enTipoCriterio.Estado:
-          result.criterios = result._estados;
+          result.criterios = state.cache.estados;
           break;
         case enTipoCriterio.Agencia:
-          result.criterios = result._agencias;
+          result.criterios = state.cache.agencias;
           break;
         case enTipoCriterio.TipoMision:
-          result.criterios = result._tiposMision;
+          result.criterios = state.cache.tiposMision;
           break;
       }
       console.log('Asignados criterios ' + enTipoCriterio[action.payload]);
@@ -27,13 +32,13 @@ export function isaStoreReducer(
     case IsaActionTypes.CambioCritero:
       switch (result.tipoCriterio) {
         case enTipoCriterio.Estado:
-          result.lanzamientos = result._lanzamientos.filter(l => l.status === Number(action.payload));
+          result.lanzamientos = state.cache.lanzamientos.filter(l => l.status === Number(action.payload));
           break;
         case enTipoCriterio.Agencia:
-          result.lanzamientos = result._lanzamientos.filter(l => l.agencyId === Number(action.payload));
+          result.lanzamientos = state.cache.lanzamientos.filter(l => l.agencyId === Number(action.payload));
           break;
         case enTipoCriterio.TipoMision:
-          result.lanzamientos = result._lanzamientos.filter(l => l.missionType === Number(action.payload));
+          result.lanzamientos = state.cache.lanzamientos.filter(l => l.missionType === Number(action.payload));
           break;
       }
       console.log(`Asignado ${result.lanzamientos.length} lanzamientos del tipoCriterio:
